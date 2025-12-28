@@ -99,7 +99,15 @@ or
 
 Alternatively, if not starting in the ArduCopter directory, but at the base ardupilot directoty:
 
-./sim_vehicle.py -v copter --console --map -w --out=tcpin:0.0.0.0:5761 / --out=udp:127.0.0.1:14550
+
+./sim_vehicle.py -v copter --console --map -w --out=tcpin:0.0.0.0:5760 / --out=tcpin:0.0.0.0:5761 (TCP Connection)
+Note: for UDP the first IP address connects to Dronekit (5760) & the second IP address is for Mission Planner (5761).
+
+or
+
+./sim_vehicle.py -v copter --console --map -w --out=udp:127.0.0.1:14550 / --out=udp:172.30.230.1:14550 (UDP Connection)
+Note: for UDP the first IP address connects to WSL & the second is your PCs IP address within WSL. (Find with in WSL with command ip addr show eth0)
+
 
 
 then
