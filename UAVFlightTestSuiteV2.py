@@ -27,6 +27,9 @@ from pathlib import Path
 from datetime import datetime
 import os
 
+# Global log directory
+log_dir = Path("logs")
+log_dir.mkdir(parents=True, exist_ok=True)
 
 class DroneTestFixture:
     """
@@ -292,13 +295,13 @@ class TestBatteryPerformance:
         self._generate_battery_plots(df)
         
         # Save data
-        log_dir = Path("logs")
-        log_dir.mkdir(parents=True, exist_ok=True)
+        # log_dir = Path("logs")
+        # log_dir.mkdir(parents=True, exist_ok=True)
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        log_file = log_dir / f'battery_test_data_{timestamp}.csv'
-        df.to_csv(log_file, index=False)
+        Battcsv_file = log_dir / f'battery_test_data_{timestamp}.csv'
+        df.to_csv(Battcsv_file, index=False)
         # print(f"\n[RESULTS] Data saved to: battery_test_data_{timestamp}.csv")
-        print(f"\n[RESULTS] Data saved to: {log_file.resolve()}")
+        print(f"\n[RESULTS] Data saved to: {Battcsv_file.resolve()}")
         
         # ===== ASSERTIONS =====
         print("\n[VALIDATION] Running test assertions...")
@@ -367,9 +370,9 @@ class TestBatteryPerformance:
         
         plt.tight_layout()
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        plot_file = log_dir / f'battery_analysis_{timestamp}.png'
-        plt.savefig(plot_file, dpi=300, bbox_inches='tight')
-        print(f"[PLOTS] Saved to: {plot_file.resolve()}")
+        Battplot_file = log_dir / f'battery_analysis_{timestamp}.png'
+        plt.savefig(Battplot_file, dpi=300, bbox_inches='tight')
+        print(f"[PLOTS] Saved to: {Battplot_file.resolve()}")
         plt.close()
 
 
@@ -551,13 +554,13 @@ class TestNavigationValidation:
         self._generate_navigation_plots(df, home_lat, home_lon, waypoint_offsets)
         
         # Save data
-        log_dir = Path("logs")
-        log_dir.mkdir(parents=True, exist_ok=True)
+        # log_dir = Path("logs")
+        # log_dir.mkdir(parents=True, exist_ok=True)
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        log_file = log_dir / f'navigation_test_data_{timestamp}.csv'
-        df.to_csv(log_file, index=False)
+        Navcsv_file = log_dir / f'navigation_test_data_{timestamp}.csv'
+        df.to_csv(Navcsv_file, index=False)
         # print(f"\n[RESULTS] Data saved to: navigation_test_data_{timestamp}.csv")
-        print(f"\n[RESULTS] Data saved to: {log_file.resolve()}")
+        print(f"\n[RESULTS] Data saved to: {Navcsv_file.resolve()}")
 
         # ===== ASSERTIONS =====
         print("\n[VALIDATION] Running test assertions...")
@@ -637,9 +640,9 @@ class TestNavigationValidation:
         
         plt.tight_layout()
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        plot_file = log_dir / f'navigation_analysis_{timestamp}.png'
-        plt.savefig(plot_file, dpi=300, bbox_inches='tight')
-        print(f"[PLOTS] Saved to: {plot_file.resolve()}")
+        Navplot_file = log_dir / f'navigation_analysis_{timestamp}.png'
+        plt.savefig(Navplot_file, dpi=300, bbox_inches='tight')
+        print(f"[PLOTS] Saved to: {Navplot_file.resolve()}")
         plt.close()
 
 
