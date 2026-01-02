@@ -8,6 +8,7 @@ Test Cases:
 1. Battery Performance Test - Measures power consumption in flight vs idle
 2. Navigation Validation Test - Verifies waypoint navigation accuracy
 """
+
 # PATCH: Fix for Python 3.10+ compatibility with dronekit (MutableMapping issue)
 import collections
 import collections.abc
@@ -22,6 +23,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from dronekit import connect, VehicleMode, LocationGlobalRelative
 from dronekit_sitl import SITL
+from pathlib import Path
 from datetime import datetime
 import os
 
@@ -49,10 +51,26 @@ class DroneTestFixture:
         
     def connect_vehicle(self):
         """Connect to the vehicle"""
-        print(f"[SETUP] Connecting to vehicle on: {self.connection_string}")
-        self.vehicle = connect(self.connection_string, wait_ready=True, timeout=60)
-        print("[SETUP] Vehicle connected successfully")
-        return self.vehicle
+        # Try multiple connection strings in order of preference
+        connection_attempts = [
+            self.connection_string,  # From SITL
+            'tcp:127.0.0.1:5760',   # Default TCP
+            'udp:127.0.0.1:14550',  # Default UDP
+            '127.0.0.1:14550',      # Alternative format
+        ]
+        
+        for conn_str in connection_attempts:
+            try:
+                print(f"[SETUP] Attempting connection to: {conn_str}")
+                self.vehicle = connect(conn_str, wait_ready=True, timeout=60, 
+                                     heartbeat_timeout=30, source_system=255)
+                print(f"[SETUP] ✓ Vehicle connected successfully on {conn_str}")
+                return self.vehicle
+            except Exception as e:
+                print(f"[SETUP] ✗ Connection failed on {conn_str}: {str(e)}")
+                continue
+        
+        raise Exception("Could not connect to vehicle on any available port")
         
     def arm_and_takeoff(self, target_altitude):
         """
@@ -274,9 +292,13 @@ class TestBatteryPerformance:
         self._generate_battery_plots(df)
         
         # Save data
+        log_dir = Path("logs")
+        log_dir.mkdir(parents=True, exist_ok=True)
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        df.to_csv(f'battery_test_data_{timestamp}.csv', index=False)
-        print(f"\n[RESULTS] Data saved to: battery_test_data_{timestamp}.csv")
+        log_file = log_dir / f'battery_test_data_{timestamp}.csv'
+        df.to_csv(log_file, index=False)
+        # print(f"\n[RESULTS] Data saved to: battery_test_data_{timestamp}.csv")
+        print(f"\n[RESULTS] Data saved to: {log_file.resolve()}")
         
         # ===== ASSERTIONS =====
         print("\n[VALIDATION] Running test assertions...")
@@ -345,8 +367,9 @@ class TestBatteryPerformance:
         
         plt.tight_layout()
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        plt.savefig(f'battery_analysis_{timestamp}.png', dpi=300, bbox_inches='tight')
-        print(f"[PLOTS] Saved to: battery_analysis_{timestamp}.png")
+        plot_file = log_dir / f'battery_analysis_{timestamp}.png'
+        plt.savefig(plot_file, dpi=300, bbox_inches='tight')
+        print(f"[PLOTS] Saved to: {plot_file.resolve()}")
         plt.close()
 
 
@@ -528,10 +551,14 @@ class TestNavigationValidation:
         self._generate_navigation_plots(df, home_lat, home_lon, waypoint_offsets)
         
         # Save data
+        log_dir = Path("logs")
+        log_dir.mkdir(parents=True, exist_ok=True)
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        df.to_csv(f'navigation_test_data_{timestamp}.csv', index=False)
-        print(f"\n[RESULTS] Data saved to: navigation_test_data_{timestamp}.csv")
-        
+        log_file = log_dir / f'navigation_test_data_{timestamp}.csv'
+        df.to_csv(log_file, index=False)
+        # print(f"\n[RESULTS] Data saved to: navigation_test_data_{timestamp}.csv")
+        print(f"\n[RESULTS] Data saved to: {log_file.resolve()}")
+
         # ===== ASSERTIONS =====
         print("\n[VALIDATION] Running test assertions...")
         
@@ -610,8 +637,9 @@ class TestNavigationValidation:
         
         plt.tight_layout()
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        plt.savefig(f'navigation_analysis_{timestamp}.png', dpi=300, bbox_inches='tight')
-        print(f"[PLOTS] Saved to: navigation_analysis_{timestamp}.png")
+        plot_file = log_dir / f'navigation_analysis_{timestamp}.png'
+        plt.savefig(plot_file, dpi=300, bbox_inches='tight')
+        print(f"[PLOTS] Saved to: {plot_file.resolve()}")
         plt.close()
 
 
@@ -624,9 +652,9 @@ if __name__ == "__main__":
     Run tests using pytest
     
     Usage:
-        python UAVFlightTestSuite.py -v                    # Run all tests with verbose output
-        python UAVFlightTestSuite.py -v -k battery         # Run only battery tests
-        python UAVFlightTestSuite.py -v -k navigation      # Run only navigation tests
+        python UAVFlightTestSuiteV2.py -v                    # Run all tests with verbose output
+        python UAVFlightTestSuiteV2.py -v -k battery         # Run only battery tests
+        python UAVFlightTestSuiteV2.py -v -k navigation      # Run only navigation tests
     """
     print("\n" + "="*70)
     print("UAV FLIGHT TEST SUITE")
