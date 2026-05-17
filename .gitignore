@@ -426,3 +426,6 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+
+# Pysimverse img_capture_lvl1.py camera captures
+pysimverse_tests/mission_captures/
